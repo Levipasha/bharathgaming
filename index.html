@@ -3,20 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Post Text</title>
+    <title>Post Your Problem</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Post Your Text</h1>
-        <form id="textForm">
-            <input type="text" id="userId" placeholder="Enter your user ID" required>
-            <input type="text" id="userName" placeholder="Enter your name" required>
-            <input type="text" id="userInput" placeholder="Enter your text here" required>
-            <button type="submit">Post</button>
-        </form>
-        <div id="postedTextContainer"></div>
-    </div>
+    <h1>Post Your Problem</h1>
+    <form id="problemForm">
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required><br>
+        <label for="problem">Problem:</label>
+        <textarea id="problem" name="problem" required></textarea><br>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required><br>
+        <button type="submit">Submit</button>
+    </form>
+    <h2>Posted Problems</h2>
+    <ul id="problemList"></ul>
+
     <script src="scripts.js"></script>
 </body>
 </html>
