@@ -5,6 +5,124 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Food Donation and Receiving</title>
     <link rel="stylesheet" href="styles.css">
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getDatabase, ref, set, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-analytics.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAKHuCMqsZxmDfeB9vXw4JVHBpRReqqngo",
+            authDomain: "abbu-d5877.firebaseapp.com",
+            projectId: "abbu-d5877",
+            storageBucket: "abbu-d5877.appspot.com",
+            messagingSenderId: "965672813320",
+            appId: "1:965672813320:web:b10244daee615cc20922bd",
+            measurementId: "G-24JMMZ7WEM"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const database = getDatabase(app);
+
+        document.addEventListener('DOMContentLoaded', function() {
+            displayFoodItems();
+
+            document.getElementById('donateForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const donorName = document.getElementById('donorName').value;
+                const foodItem = document.getElementById('foodItem').value;
+                const quantity = document.getElementById('quantity').value;
+                const location = document.getElementById('location').value;
+                const expiry = document.getElementById('expiry').value;
+
+                if (!donorName || !foodItem || !quantity || !location || !expiry) {
+                    alert("Please fill in all fields.");
+                    return;
+                }
+
+                const expiryTime = Date.now() + expiry * 60000; // Convert minutes to milliseconds
+
+                const newEntry = {
+                    donorName,
+                    foodItem,
+                    quantity,
+                    location,
+                    expiryTime
+                };
+
+                const newEntryRef = push(ref(database, 'foodItems'));
+                set(newEntryRef, newEntry);
+
+                this.reset();
+            });
+
+            document.getElementById('requestForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const requesterName = document.getElementById('requesterName').value;
+                const requestedFood = document.getElementById('requestedFood').value;
+                const requestedQuantity = document.getElementById('requestedQuantity').value;
+
+                if (!requesterName || !requestedFood || !requestedQuantity) {
+                    alert("Please fill in all fields.");
+                    return;
+                }
+
+                onValue(ref(database, 'foodItems'), (snapshot) => {
+                    const foodList = snapshot.val();
+                    let found = false;
+
+                    for (let key in foodList) {
+                        if (foodList[key].foodItem === requestedFood && foodList[key].quantity >= requestedQuantity) {
+                            const donorLocation = foodList[key].location;
+                            foodList[key].quantity -= requestedQuantity;
+
+                            if (foodList[key].quantity === 0) {
+                                remove(ref(database, 'foodItems/' + key));
+                            } else {
+                                update(ref(database, 'foodItems/' + key), { quantity: foodList[key].quantity });
+                            }
+
+                            alert(`Food request successful! Donor location: ${donorLocation}`);
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    if (!found) {
+                        alert('Requested food item not available or insufficient quantity.');
+                    }
+
+                    displayFoodItems();
+                });
+
+                this.reset();
+            });
+
+            function displayFoodItems() {
+                const foodListElement = document.getElementById('foodList');
+                foodListElement.innerHTML = '';
+
+                onValue(ref(database, 'foodItems'), (snapshot) => {
+                    const foodList = snapshot.val();
+                    for (let key in foodList) {
+                        const item = foodList[key];
+                        if (item.expiryTime > Date.now()) {
+                            const li = document.createElement('li');
+                            li.innerHTML = `<strong>${item.foodItem}</strong> - Quantity: ${item.quantity} (Donor: ${item.donorName}, Location: ${item.location})`;
+                            foodListElement.appendChild(li);
+                        } else {
+                            remove(ref(database, 'foodItems/' + key));
+                        }
+                    }
+                });
+            }
+        });
+    </script>
 </head>
 <body>
     <h1>Food Donation and Receiving</h1>
@@ -17,6 +135,10 @@
         <input type="text" id="foodItem" name="foodItem" required><br>
         <label for="quantity">Quantity:</label>
         <input type="number" id="quantity" name="quantity" required><br>
+        <label for="location">Location:</label>
+        <input type="text" id="location" name="location" required><br>
+        <label for="expiry">Expiry Time (in minutes):</label>
+        <input type="number" id="expiry" name="expiry" required><br>
         <button type="submit">Donate</button>
     </form>
     
