@@ -1,47 +1,57 @@
-document.getElementById('problemForm').addEventListener('submit', function(e) {
+document.getElementById('donateForm').addEventListener('submit', function(e) {
     e.preventDefault();
 
-    const username = document.getElementById('username').value;
-    const problem = document.getElementById('problem').value;
-    const password = document.getElementById('password').value;
+    const donorName = document.getElementById('donorName').value;
+    const foodItem = document.getElementById('foodItem').value;
+    const quantity = document.getElementById('quantity').value;
 
-    const problems = JSON.parse(localStorage.getItem('problems')) || [];
+    const foodList = JSON.parse(localStorage.getItem('foodList')) || [];
 
-    problems.push({ username, problem, password });
+    foodList.push({ donorName, foodItem, quantity });
 
-    localStorage.setItem('problems', JSON.stringify(problems));
+    localStorage.setItem('foodList', JSON.stringify(foodList));
 
-    displayProblems();
+    displayFoodItems();
     this.reset();
 });
 
-function displayProblems() {
-    const problems = JSON.parse(localStorage.getItem('problems')) || [];
-    const problemList = document.getElementById('problemList');
-    problemList.innerHTML = '';
+document.getElementById('requestForm').addEventListener('submit', function(e) {
+    e.preventDefault();
 
-    problems.forEach((problem, index) => {
+    const requesterName = document.getElementById('requesterName').value;
+    const requestedFood = document.getElementById('requestedFood').value;
+    const requestedQuantity = document.getElementById('requestedQuantity').value;
+
+    const foodList = JSON.parse(localStorage.getItem('foodList')) || [];
+
+    const itemIndex = foodList.findIndex(item => item.foodItem === requestedFood && item.quantity >= requestedQuantity);
+
+    if (itemIndex !== -1) {
+        foodList[itemIndex].quantity -= requestedQuantity;
+        if (foodList[itemIndex].quantity === 0) {
+            foodList.splice(itemIndex, 1);
+        }
+        localStorage.setItem('foodList', JSON.stringify(foodList));
+        alert('Food request successful!');
+    } else {
+        alert('Requested food item not available or insufficient quantity.');
+    }
+
+    displayFoodItems();
+    this.reset();
+});
+
+function displayFoodItems() {
+    const foodList = JSON.parse(localStorage.getItem('foodList')) || [];
+    const foodListElement = document.getElementById('foodList');
+    foodListElement.innerHTML = '';
+
+    foodList.forEach((item, index) => {
         const li = document.createElement('li');
-        li.innerHTML = `
-            <strong>${problem.username}</strong>: ${problem.problem}
-            <button onclick="deleteProblem(${index})">Delete</button>
-        `;
-        problemList.appendChild(li);
+        li.innerHTML = `<strong>${item.foodItem}</strong> - Quantity: ${item.quantity} (Donor: ${item.donorName})`;
+        foodListElement.appendChild(li);
     });
 }
 
-function deleteProblem(index) {
-    const problems = JSON.parse(localStorage.getItem('problems'));
-    const password = prompt("Enter the password to delete this problem:");
-
-    if (password === problems[index].password) {
-        problems.splice(index, 1);
-        localStorage.setItem('problems', JSON.stringify(problems));
-        displayProblems();
-    } else {
-        alert("Incorrect password. Unable to delete the problem.");
-    }
-}
-
-// Display problems when the page loads
-document.addEventListener('DOMContentLoaded', displayProblems);
+// Display food items when the page loads
+document.addEventListener('DOMContentLoaded', displayFoodItems);
