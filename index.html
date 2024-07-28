@@ -3,22 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Post Your Problem</title>
+    <title>Food Donation and Receiving</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <h1 align="center">Post Your saw a stranger without food</h1>
-    <form id="problemForm">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required><br>
-        <label for="problem">Problem:</label>
-        <textarea id="problem" name="problem" required></textarea><br>
-        <label for="password">Password:</label>
-        <input type="password" id="password" name="password" required><br>
-        <button type="submit">Submit</button>
+    <h1>Food Donation and Receiving</h1>
+    
+    <h2>Donate Food</h2>
+    <form id="donateForm">
+        <label for="donorName">Name:</label>
+        <input type="text" id="donorName" name="donorName" required><br>
+        <label for="foodItem">Food Item:</label>
+        <input type="text" id="foodItem" name="foodItem" required><br>
+        <label for="quantity">Quantity:</label>
+        <input type="number" id="quantity" name="quantity" required><br>
+        <button type="submit">Donate</button>
     </form>
-    <h2>Posted Problems</h2>
-    <ul id="problemList"></ul>
+    
+    <h2>Available Food Items</h2>
+    <ul id="foodList"></ul>
+    
+    <h2>Request Food</h2>
+    <form id="requestForm">
+        <label for="requesterName">Name:</label>
+        <input type="text" id="requesterName" name="requesterName" required><br>
+        <label for="requestedFood">Requested Food Item:</label>
+        <input type="text" id="requestedFood" name="requestedFood" required><br>
+        <label for="requestedQuantity">Quantity:</label>
+        <input type="number" id="requestedQuantity" name="requestedQuantity" required><br>
+        <button type="submit">Request</button>
+    </form>
 
     <script src="scripts.js"></script>
 </body>
