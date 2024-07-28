@@ -1,70 +1,47 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const postedTextContainer = document.getElementById('postedTextContainer');
-    loadPosts();
+document.getElementById('problemForm').addEventListener('submit', function(e) {
+    e.preventDefault();
 
-    document.getElementById('textForm').addEventListener('submit', function(event) {
-        event.preventDefault();
+    const username = document.getElementById('username').value;
+    const problem = document.getElementById('problem').value;
+    const password = document.getElementById('password').value;
 
-        const userId = document.getElementById('userId').value;
-        const userName = document.getElementById('userName').value;
-        const userInput = document.getElementById('userInput').value;
+    const problems = JSON.parse(localStorage.getItem('problems')) || [];
 
-        if (userId.trim() !== "" && userName.trim() !== "" && userInput.trim() !== "") {
-            const post = {
-                userId,
-                userName,
-                userInput
-            };
+    problems.push({ username, problem, password });
 
-            addPostToDOM(post);
-            savePost(post);
+    localStorage.setItem('problems', JSON.stringify(problems));
 
-            document.getElementById('userId').value = '';
-            document.getElementById('userName').value = '';
-            document.getElementById('userInput').value = ''; // Clear the input fields
-        } else {
-            alert("Please fill in all fields.");
-        }
-    });
-
-    function addPostToDOM(post) {
-        const postDiv = document.createElement('div');
-        postDiv.classList.add('post');
-
-        const postContent = document.createElement('div');
-        postContent.innerHTML = `<strong>${post.userName}</strong> (${post.userId}): ${post.userInput}`;
-
-        const deleteButton = document.createElement('button');
-        deleteButton.innerText = 'Delete';
-        deleteButton.addEventListener('click', function() {
-            const enteredId = prompt("Please enter your user ID to delete:");
-            if (enteredId === post.userId) {
-                postedTextContainer.removeChild(postDiv);
-                deletePost(post);
-            } else {
-                alert("Incorrect ID. You can only delete your own posts.");
-            }
-        });
-
-        postDiv.appendChild(postContent);
-        postDiv.appendChild(deleteButton);
-        postedTextContainer.appendChild(postDiv);
-    }
-
-    function savePost(post) {
-        let posts = JSON.parse(localStorage.getItem('posts')) || [];
-        posts.push(post);
-        localStorage.setItem('posts', JSON.stringify(posts));
-    }
-
-    function loadPosts() {
-        const posts = JSON.parse(localStorage.getItem('posts')) || [];
-        posts.forEach(post => addPostToDOM(post));
-    }
-
-    function deletePost(postToDelete) {
-        let posts = JSON.parse(localStorage.getItem('posts')) || [];
-        posts = posts.filter(post => post.userId !== postToDelete.userId || post.userInput !== postToDelete.userInput);
-        localStorage.setItem('posts', JSON.stringify(posts));
-    }
+    displayProblems();
+    this.reset();
 });
+
+function displayProblems() {
+    const problems = JSON.parse(localStorage.getItem('problems')) || [];
+    const problemList = document.getElementById('problemList');
+    problemList.innerHTML = '';
+
+    problems.forEach((problem, index) => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+            <strong>${problem.username}</strong>: ${problem.problem}
+            <button onclick="deleteProblem(${index})">Delete</button>
+        `;
+        problemList.appendChild(li);
+    });
+}
+
+function deleteProblem(index) {
+    const problems = JSON.parse(localStorage.getItem('problems'));
+    const password = prompt("Enter the password to delete this problem:");
+
+    if (password === problems[index].password) {
+        problems.splice(index, 1);
+        localStorage.setItem('problems', JSON.stringify(problems));
+        displayProblems();
+    } else {
+        alert("Incorrect password. Unable to delete the problem.");
+    }
+}
+
+// Display problems when the page loads
+document.addEventListener('DOMContentLoaded', displayProblems);
